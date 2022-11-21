@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/sendNotification/:client", (req, res) => {
-  const obj = { msg: req.body.msg, body: req.body.body };
+  const obj = { msg: req.body.msg, body: req.body.body, uri: req.body.uri };
   var axios = require("axios");
 
   var url =
@@ -49,7 +49,7 @@ app.post("/api/sendNotification/:client", (req, res) => {
 
   axios(config)
     .then(function (response) {
-      const result = response.data.result;
+      // const result = response.data.result;
 
       // console.log(result);
       const myJSON = JSON.stringify(obj);
