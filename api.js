@@ -12,9 +12,6 @@ webpush.setVapidDetails(
   vapidKeys.privateKey
 );
 
-// This is the same output of calling JSON.stringify on a PushSubscription
-//
-
 const express = require("express");
 var multer = require("multer");
 var upload = multer();
@@ -27,6 +24,7 @@ const books = [
   { title: "Twilight", id: 2 },
   { title: "Lorien Legacies", id: 3 },
 ];
+
 // for parsing multipart/form-data
 app.use(upload.array());
 app.use(express.static("public"));
@@ -36,21 +34,24 @@ app.get("/", (req, res) => {
   res.send("Welcome to Edurekas REST API with Node.js Tutorial!!");
 });
 
-app.post("/api/sendNotification", (req, res) => {
+app.post("/api/sendNotification/:client", (req, res) => {
   const obj = { msg: req.body.msg, body: req.body.body };
   var axios = require("axios");
 
+  var url =
+    "https://seatvnetwork.com/api/getSubscriptions?client=" + req.params.client;
+
   var config = {
     method: "get",
-    url: "https://seatvnetwork.com/api/getSubscriptions",
+    url: url,
     headers: {},
   };
 
   axios(config)
     .then(function (response) {
-      //   console.log(response.data);
       const result = response.data.result;
 
+      // console.log(result);
       const myJSON = JSON.stringify(obj);
       const promises = [];
       result.forEach((row) => {

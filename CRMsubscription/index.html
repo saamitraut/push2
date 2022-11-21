@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <button onclick="subscribe()">Subscribe</button>
+
+    <script>
+      function displayNotification() {
+        if (Notification.permission == "granted") {
+          var options = {
+            body: "Her is a notification body!",
+            icon: "images/example.png",
+            vibrate: [100, 50, 100],
+            data: { primaryKey: 1 },
+          };
+
+          navigator.serviceWorker
+            .getRegistration()
+            .then((reg) => reg.showNotification("Hello world!", options));
+        }
+      }
+      async function subscribe() {
+        let sw = await navigator.serviceWorker.ready;
+        let subscription = await sw.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey:
+            "BCmmuz9x4KoRSTShd-lPYPgdsVVX8TjhisjAet0pib9oUqkxuTSyHqohS194qCm6tAviZtMePTAMyRj36mePDHI",
+        });
+        console.log(JSON.stringify(subscription));
+
+        var url = new URL(window.location.href);
+        var id = JSON.parse(window.atob(url.searchParams.get("id")));
+
+        var formdata = new FormData();
+
+        formdata.append("userid", id.USERID);
+        formdata.append("client", id.client);
+        formdata.append("subscription", JSON.stringify(subscription));
+        formdata.append("username", id.username);
+        var requestOptions = {
+          method: "POST",
+          body: formdata,
+          redirect: "follow",
+        };
+        //
+
+        fetch(
+          "https://seatvnetwork.com/api/insertBrowserRegistration",
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => {
+            console.log(result);
+            result = JSON.parse(result);
+            // document.getElementById("msg").innerHTML = result;
+            icon = result.success == "true" ? "success" : "error";
+            title = result.success == "true" ? "Hurray.." : "Oops..";
+            Swal.fire({
+              icon: icon,
+              title: title,
+              text: result.Message,
+              // footer: '<a href="">Why do I have this issue?</a>',
+            });
+          })
+          .catch((error) => {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: error,
+            });
+            console.log("error", error);
+          });
+      }
+      if ("serviceWorker" in navigator) {
+        addEventListener("load", async () => {
+          let swRegistration = await navigator.serviceWorker.register(
+            "./sw1.js"
+          );
+          console.log(swRegistration);
+        });
+      }
+    </script>
+  </body>
+</html>
